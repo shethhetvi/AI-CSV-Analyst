@@ -1,6 +1,14 @@
 import streamlit as st
 import pandas as pd
+import os
+from dotenv import load_dotenv
+
+# Load environment variables (like GOOGLE_API_KEY)
+load_dotenv()
+
 from tools.csv_loader import save_and_load_csv
+from agent.graph import app_graph
+from langchain_core.messages import HumanMessage, AIMessage
 
 st.set_page_config(page_title="AI CSV Analyst", page_icon="📊", layout="wide")
 
@@ -15,15 +23,52 @@ with st.sidebar:
 if uploaded_file is not None:
     # Load and show the dataframe
     try:
-        df = save_and_load_csv(uploaded_file)
-        st.session_state["df"] = df
-        st.session_state["file_path"] = f"uploads/{uploaded_file.name}"
-        
+        if "df" not in st.session_state:
+            df = save_and_load_csv(uploaded_file)
+            st.session_state["df"] = df
+            st.session_state["file_path"] = os.path.join("uploads", uploaded_file.name)
+            
         st.success("File uploaded successfully!")
-        st.subheader("Data Preview")
-        st.dataframe(df.head(10))
-        st.caption(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
+        with st.expander("Preview Data"):
+            st.dataframe(st.session_state["df"].head(10))
+            st.caption(f"Shape: {st.session_state['df'].shape[0]} rows, {st.session_state['df'].shape[1]} columns")
+            
     except Exception as e:
         st.error(f"Error loading file: {e}")
+        
+    st.divider()
+    st.header("2. Ask the Agent")
+    
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+        
+    # Display chat messages from history
+    for msg in st.session_state["messages"]:
+        if isinstance(msg, HumanMessage):
+            st.chat_message("user").write(msg.content)
+        elif isinstance(msg, AIMessage) and msg.content:
+            st.chat_message("assistant").write(msg.content)
+            
+    # Chat input
+    if prompt := st.chat_input("Ask me about your data (e.g., 'What are the columns?')..."):
+        st.chat_message("user").write(prompt)
+        st.session_state["messages"].append(HumanMessage(content=prompt))
+        
+        # Call the LangGraph agent
+        with st.spinner("Agent is analyzing..."):
+            inputs = {
+                "messages": st.session_state["messages"],
+                "csv_file_path": st.session_state["file_path"]
+            }
+            
+            final_state = app_graph.invoke(inputs)
+            
+            # Update our session state with the new messages
+            st.session_state["messages"] = final_state["messages"]
+            
+            # Display the latest AI message
+            latest_ai_msg = final_state["messages"][-1]
+            st.chat_message("assistant").write(latest_ai_msg.content)
 else:
     st.info("Please upload a CSV file in the sidebar to get started.")
