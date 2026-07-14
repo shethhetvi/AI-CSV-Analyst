@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 from dotenv import load_dotenv
+from tools.charts import CHART_PREFIX
 
 # Load environment variables (like GOOGLE_API_KEY)
 load_dotenv()
@@ -48,7 +49,12 @@ if uploaded_file is not None:
         if isinstance(msg, HumanMessage):
             st.chat_message("user").write(msg.content)
         elif isinstance(msg, AIMessage) and msg.content:
-            st.chat_message("assistant").write(msg.content)
+            with st.chat_message("assistant"):
+                if CHART_PREFIX in msg.content:
+                    chart_path = msg.content.split(CHART_PREFIX, 1)[-1].strip()
+                    st.image(chart_path, use_container_width=True)
+                else:
+                    st.write(msg.content)
             
     # Chat input
     if prompt := st.chat_input("Ask me about your data (e.g., 'What are the columns?')..."):
@@ -69,6 +75,11 @@ if uploaded_file is not None:
             
             # Display the latest AI message
             latest_ai_msg = final_state["messages"][-1]
-            st.chat_message("assistant").write(latest_ai_msg.content)
+            with st.chat_message("assistant"):
+                if latest_ai_msg.content and CHART_PREFIX in latest_ai_msg.content:
+                    chart_path = latest_ai_msg.content.split(CHART_PREFIX, 1)[-1].strip()
+                    st.image(chart_path, use_container_width=True)
+                elif latest_ai_msg.content:
+                    st.write(latest_ai_msg.content)
 else:
     st.info("Please upload a CSV file in the sidebar to get started.")
