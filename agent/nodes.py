@@ -1,11 +1,11 @@
 import os
 # pyrefly: ignore [missing-import]
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage
 from tools.analyzer import analyzer_tool
 
-# Initialize the Gemini model
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-lite", temperature=0)
+# Initialize the local Ollama model (runs locally, no API key required)
+llm = ChatOllama(model="qwen2.5:7b", temperature=0)
 
 # Bind our tools to the LLM
 tools = [analyzer_tool]
