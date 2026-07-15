@@ -1,5 +1,6 @@
 import pandas as pd
 from langchain_core.tools import tool
+from tools.security import validate_csv_path
 
 @tool
 def analyzer_tool(query: str, csv_path: str) -> str:
@@ -9,7 +10,10 @@ def analyzer_tool(query: str, csv_path: str) -> str:
     Supported queries: "shape" (number of rows/cols), "columns" (list of columns), "head" (first few rows).
     """
     try:
+        csv_path = validate_csv_path(csv_path)
         df = pd.read_csv(csv_path)
+    except ValueError as e:
+        return f"Security error: {e}"
     except Exception as e:
         return f"Error reading CSV: {e}"
         
