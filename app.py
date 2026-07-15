@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from tools.charts import CHART_PREFIX
+from tools.security import sanitize_user_input
 
 # Load environment variables (like GOOGLE_API_KEY)
 load_dotenv()
@@ -25,9 +26,11 @@ if uploaded_file is not None:
     # Load and show the dataframe
     try:
         if "df" not in st.session_state:
-            df = save_and_load_csv(uploaded_file)
+            df, file_path, load_warnings = save_and_load_csv(uploaded_file)
             st.session_state["df"] = df
-            st.session_state["file_path"] = os.path.join("uploads", uploaded_file.name)
+            st.session_state["file_path"] = file_path
+            for w in load_warnings:
+                st.warning(w)
             
         st.success("File uploaded successfully!")
         with st.expander("Preview Data"):
@@ -58,8 +61,13 @@ if uploaded_file is not None:
             
     # Chat input
     if prompt := st.chat_input("Ask me about your data (e.g., 'What are the columns?')..."):
-        st.chat_message("user").write(prompt)
-        st.session_state["messages"].append(HumanMessage(content=prompt))
+        # --- Security: sanitize user input before sending to LLM ---
+        clean_prompt, input_warnings = sanitize_user_input(prompt)
+        for w in input_warnings:
+            st.warning(w)
+
+        st.chat_message("user").write(clean_prompt)
+        st.session_state["messages"].append(HumanMessage(content=clean_prompt))
         
         # Call the LangGraph agent
         with st.spinner("Agent is analyzing..."):
