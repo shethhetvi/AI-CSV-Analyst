@@ -3,10 +3,18 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from tools.charts import CHART_PREFIX
-from tools.security import sanitize_user_input, MAX_QUERIES_PER_SESSION
+from tools.security import sanitize_user_input, MAX_QUERIES_PER_SESSION, validate_csv_path
 
 # Load environment variables (like GOOGLE_API_KEY)
 load_dotenv()
+
+# --- Security: startup environment check ---
+_GOOGLE_KEY = os.getenv("GOOGLE_API_KEY", "")
+if not _GOOGLE_KEY or _GOOGLE_KEY.strip() == "":
+    st.warning(
+        "⚠️ **GOOGLE_API_KEY** is not set. "
+        "Some features may not work. Add it to your `.env` file and restart the app."
+    )
 
 from tools.csv_loader import save_and_load_csv
 from agent.graph import app_graph
@@ -63,7 +71,12 @@ if uploaded_file is not None:
             with st.chat_message("assistant"):
                 if CHART_PREFIX in msg.content:
                     chart_path = msg.content.split(CHART_PREFIX, 1)[-1].strip()
-                    st.image(chart_path, use_container_width=True)
+                    # --- Security: validate chart path before rendering ---
+                    try:
+                        safe_chart_path = validate_csv_path(chart_path.replace(".png", ".csv")).replace(".csv", ".png")
+                        st.image(chart_path, use_container_width=True)
+                    except ValueError:
+                        st.warning("⚠️ Chart could not be displayed: invalid path.")
                 else:
                     st.write(msg.content)
             
@@ -100,7 +113,17 @@ if uploaded_file is not None:
             with st.chat_message("assistant"):
                 if latest_ai_msg.content and CHART_PREFIX in latest_ai_msg.content:
                     chart_path = latest_ai_msg.content.split(CHART_PREFIX, 1)[-1].strip()
-                    st.image(chart_path, use_container_width=True)
+                    # --- Security: validate chart path is inside uploads/ ---
+                    try:
+                        # Chart paths end in .png; swap extension for validate_csv_path trick
+                        uploads_dir = os.path.realpath("uploads")
+                        resolved_chart = os.path.realpath(chart_path)
+                        if resolved_chart.startswith(uploads_dir + os.sep):
+                            st.image(chart_path, use_container_width=True)
+                        else:
+                            st.warning("⚠️ Chart path is outside allowed directory and was blocked.")
+                    except Exception:
+                        st.warning("⚠️ Could not verify chart path.")
                 elif latest_ai_msg.content:
                     st.write(latest_ai_msg.content)
 else:
