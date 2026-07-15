@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from tools.charts import CHART_PREFIX
-from tools.security import sanitize_user_input
+from tools.security import sanitize_user_input, MAX_QUERIES_PER_SESSION
 
 # Load environment variables (like GOOGLE_API_KEY)
 load_dotenv()
@@ -43,9 +43,17 @@ if uploaded_file is not None:
     st.divider()
     st.header("2. Ask the Agent")
     
-    # Initialize chat history
+    # Initialize chat history and query counter
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
+    if "query_count" not in st.session_state:
+        st.session_state["query_count"] = 0
+
+    # Show rate-limit progress in sidebar
+    with st.sidebar:
+        remaining = MAX_QUERIES_PER_SESSION - st.session_state["query_count"]
+        st.caption(f"🔒 Queries used: {st.session_state['query_count']} / {MAX_QUERIES_PER_SESSION}")
+        st.progress(st.session_state["query_count"] / MAX_QUERIES_PER_SESSION)
         
     # Display chat messages from history
     for msg in st.session_state["messages"]:
@@ -60,7 +68,12 @@ if uploaded_file is not None:
                     st.write(msg.content)
             
     # Chat input
-    if prompt := st.chat_input("Ask me about your data (e.g., 'What are the columns?')..."):
+    if st.session_state["query_count"] >= MAX_QUERIES_PER_SESSION:
+        st.error(
+            f"🚫 You've reached the session limit of {MAX_QUERIES_PER_SESSION} queries. "
+            "Please refresh the page to start a new session."
+        )
+    elif prompt := st.chat_input("Ask me about your data (e.g., 'What are the columns?')..."):
         # --- Security: sanitize user input before sending to LLM ---
         clean_prompt, input_warnings = sanitize_user_input(prompt)
         for w in input_warnings:
@@ -80,6 +93,7 @@ if uploaded_file is not None:
             
             # Update our session state with the new messages
             st.session_state["messages"] = final_state["messages"]
+            st.session_state["query_count"] += 1  # Track against rate limit
             
             # Display the latest AI message
             latest_ai_msg = final_state["messages"][-1]
