@@ -52,4 +52,5 @@ To run this project locally, you need to set up your Google Cloud Platform (GCP)
    GOOGLE_API_KEY="your-gcp-api-key-here"
    ```
    *(Note: The `.env` file is ignored by Git, so your secret will be kept safe locally.)*
+   still in progress
 4. **Run the App**: `streamlit run app.py`
