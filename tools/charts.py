@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use("Agg")  # Non-interactive backend, safe for Streamlit
 import matplotlib.pyplot as plt
 from langchain_core.tools import tool
+from tools.security import validate_csv_path
 
 CHART_PREFIX = "CHART:"
 
@@ -33,7 +34,10 @@ def chart_tool(csv_path: str, chart_type: str, x_column: str, y_column: str = ""
         or an error message if something goes wrong.
     """
     try:
+        csv_path = validate_csv_path(csv_path)
         df = pd.read_csv(csv_path)
+    except ValueError as e:
+        return f"Security error: {e}"
     except Exception as e:
         return f"Error reading CSV: {e}"
 
