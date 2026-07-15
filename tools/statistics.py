@@ -1,5 +1,6 @@
 import pandas as pd
 from langchain_core.tools import tool
+from tools.security import validate_csv_path
 
 
 @tool
@@ -24,7 +25,10 @@ def statistics_tool(csv_path: str, query: str) -> str:
         A formatted string with the analysis results.
     """
     try:
+        csv_path = validate_csv_path(csv_path)
         df = pd.read_csv(csv_path)
+    except ValueError as e:
+        return f"Security error: {e}"
     except Exception as e:
         return f"Error reading CSV: {e}"
 
