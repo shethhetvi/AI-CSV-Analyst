@@ -49,3 +49,55 @@ def validate_csv_path(csv_path: str) -> str:
         )
 
     return resolved
+
+
+import re  # noqa: E402 — placed after validate_csv_path for readability
+
+# Phrases commonly used in prompt-injection attacks
+_INJECTION_PATTERNS = re.compile(
+    r"(ignore (all |previous |above |prior )?(instructions?|prompts?|rules?|context))|"
+    r"(you are now|act as|pretend (to be|you are)|new (persona|role|identity))|"
+    r"(disregard|forget|override|bypass).{0,30}(instruction|system|rule)|"
+    r"(jailbreak|DAN mode|developer mode)",
+    re.IGNORECASE,
+)
+
+MAX_INPUT_LENGTH = 2_000  # characters
+
+
+def sanitize_user_input(text: str) -> tuple[str, list[str]]:
+    """
+    Clean and validate user-supplied chat text before passing it to the LLM.
+
+    Performs the following checks in order:
+    1. Strips null bytes and ASCII control characters (except newline/tab).
+    2. Truncates input exceeding ``MAX_INPUT_LENGTH`` characters.
+    3. Scans for prompt-injection phrases and flags them.
+
+    Args:
+        text: Raw user input from the chat widget.
+
+    Returns:
+        A tuple ``(cleaned_text, warnings)`` where ``warnings`` is a list
+        of human-readable warning strings (empty when input is clean).
+    """
+    warnings: list[str] = []
+
+    # 1. Strip dangerous control characters (keep \n and \t)
+    cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+
+    # 2. Enforce length cap
+    if len(cleaned) > MAX_INPUT_LENGTH:
+        cleaned = cleaned[:MAX_INPUT_LENGTH]
+        warnings.append(
+            f"⚠️ Your message was truncated to {MAX_INPUT_LENGTH} characters."
+        )
+
+    # 3. Detect prompt injection attempts
+    if _INJECTION_PATTERNS.search(cleaned):
+        warnings.append(
+            "⚠️ Your message appears to contain instruction-override phrases. "
+            "The agent will only answer questions about your CSV data."
+        )
+
+    return cleaned, warnings
