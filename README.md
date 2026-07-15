@@ -1,56 +1,98 @@
-# 📊 AI CSV Analyst
+<div align="center">
+  
+  # 🧠✨ AI CSV Analyst
 
-![AI CSV Analyst Banner](https://img.shields.io/badge/AI-CSV_Analyst-blue?style=for-the-badge&logo=python&logoColor=white)
+  **Your Intelligent, Agentic Data Scientist in a Box**
 
-An intelligent, agentic data analysis tool powered by LLMs. Just upload your CSV, and let the AI figure out how to analyze, chart, and summarize your data!
+  [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+  [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+  [![LangGraph](https://img.shields.io/badge/LangGraph-000000.svg?style=for-the-badge&logo=code&logoColor=white)](https://python.langchain.com/v0.1/docs/langgraph/)
+  [![Gemini](https://img.shields.io/badge/Powered%20by-Gemini%20%2F%20Ollama-8A2BE2.svg?style=for-the-badge)](https://ai.google.dev/)
 
-## 🚀 Features (Planned)
+  *Upload a CSV, ask questions in plain English, and let the AI analyze, visualize, and summarize your data instantly!*
 
-- **Upload & Explore**: Seamlessly load CSV data into Pandas DataFrames.
-- **Agentic Routing**: Uses an LLM to decide which tool handles your specific query.
-- **Natural Language Analysis**: Ask questions like *"Show me the first 5 rows"* or *"What's the dataset shape?"* and get instant answers.
-- **Advanced Visualizations**: Automatically generate beautiful Matplotlib charts (Histograms, Bar, Pie, Scatter).
-- **Data Quality Checks**: Automatically find missing values and duplicates.
+</div>
 
-## 🛠️ Technology Stack
+---
 
-- **Frontend**: Streamlit
-- **LLM**: Gemini / Ollama
-- **Agent Framework**: LangGraph
-- **Data Processing**: Pandas
-- **Visualizations**: Matplotlib
-- **Validation**: Pydantic
-- **Environment**: Python 3.11+
+## 🌟 Why AI CSV Analyst?
 
-## 📂 Project Structure
+Gone are the days of writing repetitive Pandas scripts just to get a basic understanding of your data. **AI CSV Analyst** uses state-of-the-art LLMs combined with agentic routing to figure out *exactly* what you need. 
 
-```text
+Want to know the average sales per region? Just ask. Need a scatter plot of age vs. income? Consider it done.
+
+---
+
+## 🚀 Features (Planned & In Progress)
+
+- 📂 **Upload & Explore**: Drop in any CSV and immediately see a structured Pandas DataFrame.
+- 🧠 **Agentic Brain**: An intelligent router decides which tool (analyzer, charts, stats) best handles your query.
+- 💬 **Chat with your Data**: Ask *"Show me the first 5 rows"* or *"What's the dataset shape?"* for instant, natural language answers.
+- 📊 **Beautiful Visualizations**: Auto-generate stunning Matplotlib charts (Histograms, Bar, Pie, Scatter).
+- 🧹 **Data Janitor**: Automatically detects missing values, duplicates, and data quality issues.
+
+---
+
+## 🛠️ The Tech Engine
+
+We've built this tool on a modern, robust AI stack:
+
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend UI** | 🎈 Streamlit | For a slick, reactive web interface |
+| **AI / LLM** | 🧠 Gemini & Ollama | The brains powering the natural language understanding |
+| **Agentic Flow** | 🕸️ LangGraph | Orchestrates the agent's thought process and tool usage |
+| **Data Engine** | 🐼 Pandas | Heavy lifting for data manipulation |
+| **Visuals** | 📈 Matplotlib | Rendering crisp, insightful charts |
+| **Validation** | 🛡️ Pydantic | Ensuring robust data types and API contracts |
+
+---
+
+## 📂 Project Architecture
+
+```bash
 .
-├── app.py                  # Streamlit frontend entry point
-├── agent/                  # LangGraph agent definitions
-│   ├── graph.py
-│   ├── nodes.py
-│   └── state.py
-├── tools/                  # The tools our agent can use
-│   ├── analyzer.py
-│   ├── charts.py
-│   ├── csv_loader.py
-│   └── statistics.py
-├── uploads/                # Local directory for uploaded files
-└── requirements.txt        # Python dependencies
+├── app.py                  # 🎈 Main Streamlit UI
+├── agent/                  # 🧠 The Agent's Brain (LangGraph)
+│   ├── graph.py            # Workflow orchestration
+│   ├── nodes.py            # Execution nodes
+│   └── state.py            # State management
+├── tools/                  # 🔧 The Agent's Toolbox
+│   ├── analyzer.py         # General data insights
+│   ├── charts.py           # Visualization generator
+│   ├── csv_loader.py       # Data ingestion
+│   └── statistics.py       # Math & metrics
+├── uploads/                # 📁 Secure local storage for CSVs
+└── requirements.txt        # 📦 Dependencies
 ```
 
-## 🎯 Getting Started
+---
 
-To run this project locally, you need to set up your Google Cloud Platform (GCP) API key.
+## 🎯 Quick Start Guide
 
-1. **Clone the repository**
-2. **Install dependencies**: `pip install -r requirements.txt`
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory of the project and add your GCP API key:
-   ```env
-   GOOGLE_API_KEY="your-gcp-api-key-here"
-   ```
-   *(Note: The `.env` file is ignored by Git, so your secret will be kept safe locally.)*
-   still in progress
-4. **Run the App**: `streamlit run app.py`
+Ready to chat with your data? Follow these steps to spin up your local instance!
+
+### 1️⃣ Clone & Install
+```bash
+git clone git@github.com:shethhetvi/AI-CSV-Analyst.git
+cd AI-CSV-Analyst
+pip install -r requirements.txt
+```
+
+### 2️⃣ Configure the Magic (API Keys)
+Create a `.env` file in the root directory. This is where your AI API key lives securely.
+```env
+# .env
+GOOGLE_API_KEY="your-gcp-api-key-here"
+```
+> **Note:** The `.env` file is in `.gitignore`, so your secret will stay safe on your local machine.
+
+### 3️⃣ Launch the App!
+*(Note: Some features are still a work in progress!)*
+```bash
+streamlit run app.py
+```
+
+<div align="center">
+  <i>Built with ❤️ for Data Enthusiasts.</i>
+</div>
